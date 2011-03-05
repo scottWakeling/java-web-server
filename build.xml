@@ -30,9 +30,21 @@
         </javac>
     </target>
     <target description="Build all projects which reference this project. Useful to propagate changes." name="build-refprojects"/>
+    <target depends="build" name="jar">
+        <mkdir dir="build/jar"/>
+        <jar destfile="build/jar/java-web-server.jar" basedir="bin">
+            <manifest>
+                <attribute name="Main-Class" value="de.ioexception.www.server.Main"/>
+            </manifest>
+        </jar>
+    </target>
     <target name="Main">
         <java classname="de.ioexception.www.server.Main" failonerror="true" fork="yes">
             <classpath refid="java-web-server.classpath"/>
         </java>
     </target>
+    <target name="run">
+        <java jar="build/jar/java-web-server.jar" fork="true"/>
+    </target>
+
 </project>
