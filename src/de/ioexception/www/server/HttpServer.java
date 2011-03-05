@@ -2,6 +2,8 @@ package de.ioexception.www.server;
 
 import java.net.Socket;
 
+import de.ioexception.www.server.log.AccessLogger;
+
 /**
  * A basic HTTP server interface.
  * 
@@ -33,5 +35,12 @@ public interface HttpServer
 	 * @return
 	 */
 	public String getServerSignature();
+	
+	/**
+	 * Returns the signature of the webserver.
+	 * 
+	 * @return
+	 */
+	public AccessLogger getAccessLogger();
 
 }
