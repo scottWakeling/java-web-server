@@ -25,8 +25,10 @@ public class CachingHttpWorker extends BasicHttpWorker
 	@Override
 	protected HttpResponse handleRequest(HttpRequest request)
 	{
+                //TODO how and when do modified entities get 'put' again to the cache?
+
 		EntityCacheEntry cacheEntry = cache.get(request.getRequestUri());
-		
+
 		if(null == cacheEntry)
 		{
 			HttpResponse response = super.handleRequest(request); 
@@ -34,28 +36,40 @@ public class CachingHttpWorker extends BasicHttpWorker
 			{
 				EntityCacheEntry entry = new EntityCacheEntryImpl(response.getEntity(), response.getHeaders().get(Http.ETAG), response.getHeaders().get(Http.CONTENT_TYPE));
 				cache.put(request.getRequestUri(), entry);
+                                response.getHeaders().put(Http.ETAG, new Integer(entry.hashCode()).toString());
 			}
 			return response;
 		}
 		else
 		{
-			//TODO check for conditional request
-			BasicHttpResponse response = new BasicHttpResponse();
-			response.setHeaders(new HashMap<String, String>());
-			response.getHeaders().put(Http.SERVER, server.getServerSignature());
-			response.setVersion(request.getHttpVersion());
-			response.getHeaders().put(Http.CONTENT_LENGTH, ""+cacheEntry.getEntity().length);
-			if(null != cacheEntry.getETag())
-			{
-				response.getHeaders().put(Http.ETAG, cacheEntry.getETag());	
-			}
-			if(null != cacheEntry.getContentType())
-			{
-				response.getHeaders().put(Http.CONTENT_TYPE, cacheEntry.getContentType());	
-			}
-			response.setEntity(cacheEntry.getEntity());
-			response.setStatusCode(HttpStatusCode.OK);
-			return response;
+                        if (request.getHeaders().containsKey(Http.IF_NONE_MATCH))
+                        {
+                            if (Integer.parseInt(request.getHeaders().get(Http.IF_NONE_MATCH)) == cacheEntry.hashCode())
+                            {
+                                BasicHttpResponse response = new BasicHttpResponse();
+                                response.setHeaders(new HashMap<String, String>());
+                                response.getHeaders().put(Http.SERVER, server.getServerSignature());
+                                response.getHeaders().put("Content-Length", "0");
+                                response.setVersion(request.getHttpVersion());
+                                response.setStatusCode(HttpStatusCode.NOT_MODIFIED);
+                                response.setEntity(null);
+                                return response;
+                            }
+                        }
+
+                        BasicHttpResponse response = new BasicHttpResponse();
+                        response.setHeaders(new HashMap<String, String>());
+                        response.getHeaders().put(Http.SERVER, server.getServerSignature());
+                        response.setVersion(request.getHttpVersion());
+                        response.getHeaders().put(Http.CONTENT_LENGTH, ""+cacheEntry.getEntity().length);
+                        response.getHeaders().put(Http.ETAG, new Integer(cacheEntry.hashCode()).toString());
+                        if(null != cacheEntry.getContentType())
+                        {
+                                response.getHeaders().put(Http.CONTENT_TYPE, cacheEntry.getContentType());
+                        }
+                        response.setEntity(cacheEntry.getEntity());
+                        response.setStatusCode(HttpStatusCode.OK);
+                        return response;
 		}
 	}
 
