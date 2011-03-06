@@ -55,7 +55,6 @@ public class BasicAuthHttpWorker extends BasicHttpWorker
 		BasicHttpResponse response = new BasicHttpResponse();
 		response.setStatusCode(HttpStatusCode.UNAUTHORIZED);
 		response.getHeaders().put(Http.WWW_AUTHENTICATE, "Basic realm=\"" + realm + "\"");
-		response.getHeaders().put(Http.CONTENT_LENGTH, "0");
 		return response;
 	}
 }
