@@ -1,5 +1,6 @@
 package de.ioexception.www.server;
 
+import de.ioexception.www.Http;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -54,7 +55,7 @@ public abstract class HttpWorker implements Callable<Void>
 		}
 		else
 		{
-			response.getHeaders().put("Connection", "close");
+			response.getHeaders().put(Http.CONNECTION, "close");
 			sendResponse(response, socket.getOutputStream());
 			socket.close();
 		}

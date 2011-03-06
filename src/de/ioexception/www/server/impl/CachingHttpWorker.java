@@ -47,18 +47,14 @@ public class CachingHttpWorker extends BasicHttpWorker
                             if (Integer.parseInt(request.getHeaders().get(Http.IF_NONE_MATCH)) == cacheEntry.hashCode())
                             {
                                 BasicHttpResponse response = new BasicHttpResponse();
-                                response.setHeaders(new HashMap<String, String>());
                                 response.getHeaders().put(Http.SERVER, server.getServerSignature());
-                                response.getHeaders().put("Content-Length", "0");
                                 response.setVersion(request.getHttpVersion());
                                 response.setStatusCode(HttpStatusCode.NOT_MODIFIED);
-                                response.setEntity(null);
                                 return response;
                             }
                         }
 
                         BasicHttpResponse response = new BasicHttpResponse();
-                        response.setHeaders(new HashMap<String, String>());
                         response.getHeaders().put(Http.SERVER, server.getServerSignature());
                         response.setVersion(request.getHttpVersion());
                         response.getHeaders().put(Http.CONTENT_LENGTH, ""+cacheEntry.getEntity().length);

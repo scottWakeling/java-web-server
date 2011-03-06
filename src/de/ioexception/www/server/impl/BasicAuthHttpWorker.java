@@ -1,5 +1,6 @@
 package de.ioexception.www.server.impl;
 
+import de.ioexception.www.Http;
 import java.net.Socket;
 import java.util.HashMap;
 import java.util.Map;
@@ -35,9 +36,9 @@ public class BasicAuthHttpWorker extends BasicHttpWorker
 	@Override
 	protected HttpResponse handleRequest(HttpRequest request)
 	{
-		if (request.getHeaders().containsKey("Authorization"))
+		if (request.getHeaders().containsKey(Http.AUTHORIZATION))
 		{
-			String authValue = request.getHeaders().get("Authorization");
+			String authValue = request.getHeaders().get(Http.AUTHORIZATION);
 			String[] authValues = authValue.split(" ", 2);
 			String type = authValues[0];
 			String values = authValues[1];
@@ -53,12 +54,8 @@ public class BasicAuthHttpWorker extends BasicHttpWorker
 		}
 		BasicHttpResponse response = new BasicHttpResponse();
 		response.setStatusCode(HttpStatusCode.UNAUTHORIZED);
-		Map<String, String> headers = new HashMap<String, String>();
-		headers.put("WWW-Authenticate", "Basic realm=\"" + realm + "\"");
-		headers.put("Content-Length", "0");
-		response.setVersion(HttpVersion.VERSION_1_1);
-		response.setHeaders(headers);
-		response.setEntity(null);
+		response.getHeaders().put(Http.WWW_AUTHENTICATE, "Basic realm=\"" + realm + "\"");
+		response.getHeaders().put(Http.CONTENT_LENGTH, "0");
 		return response;
 	}
 }

@@ -80,10 +80,8 @@ public class BasicHttpWorker extends HttpWorker
 
 		
 		BasicHttpResponse response = new BasicHttpResponse();
-		response.setHeaders(new HashMap<String, String>());
 		response.getHeaders().put(Http.SERVER, server.getServerSignature());
-		response.setVersion(request.getHttpVersion());
-
+		
 		String requestUri = request.getRequestUri();
 		if (requestUri.equals("/"))
 		{
