@@ -37,6 +37,25 @@ public class DigestAuthCredentialsTest {
     }
 
     /**
+     * As testDigestAuthCredentials, but tests a case seen with Safari where
+     * the usually unquoted qop value is returned in quotes
+     */
+    @Test
+    public void testDigestAuthCredentialsSafari() {
+        System.out.println("testDigestAuthCredentialsSafari");
+        DigestAuthCredentials creds = new DigestAuthCredentials("username=\"user\", "
+                                                                + "realm=\"Protected Area\", "
+                                                                + "nonce=\"\", "
+                                                                + "uri=\"/rince wind/index.html\", "
+                                                                + "qop=\"auth\", "
+                                                                + "nc=00000001, "
+                                                                + "cnonce=\"0a4f113b\", "
+                                                                + "response=\"8a6291c576b982d5bdec1a9cca884688\"");
+        
+        assertEquals("auth", creds.getQOP());
+    }
+
+    /**
      * Test of getHA1 method of class DigestAuthCredentials.
      * 
      */

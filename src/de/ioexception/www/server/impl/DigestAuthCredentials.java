@@ -26,14 +26,15 @@ public class DigestAuthCredentials {
     private String response;
     
     public DigestAuthCredentials(String credentials) {
-        username = fetchParam("username", credentials, "\"[^\"\r\n]*", "=\"");
-        realm = fetchParam("realm", credentials, "\"[^\"\r\n]*", "=\"");
-        nonce = fetchParam("nonce", credentials, "\"[^\"\r\n]*", "=\"");
-        uri = fetchParam("uri", credentials, "\"[^\"\r\n]*", "=\"");
-        qop = fetchParam("qop", credentials, "[^\"\r\n,]*", "=");
-        nc = fetchParam("nc", credentials, "[^\"\r\n,]*", "=");
-        cnonce = fetchParam("cnonce", credentials, "\"[^\"\r\n]*", "=\"");
-        response = fetchParam("response", credentials, "\"[^\"\r\n]*", "=\"");
+        
+        username = fetchParam("username", credentials);
+        realm = fetchParam("realm", credentials);
+        nonce = fetchParam("nonce", credentials);
+        uri = fetchParam("uri", credentials);
+        qop = fetchParam("qop", credentials);
+        nc = fetchParam("nc", credentials);
+        cnonce = fetchParam("cnonce", credentials);
+        response = fetchParam("response", credentials);
     }
 
     public String getResponse() {
@@ -93,16 +94,43 @@ public class DigestAuthCredentials {
         return digest;
     }
 
-    private String fetchParam(String param, String credentials, String paramRegex, String splitter) {
+    /**
+     * Extracts a named parameter from the given credentials string, as
+     * sent by the client's browser in response to a WWW-Authenticate 401
+     *
+     * Assumes parameter values never contain commas, double quotes, \r, or \n
+     *
+     * Some params are double-quoted by some browsers and not by others,
+     * e.g. 'qop' is double-quoted by Safari but not by Firefox, hence
+     * some retry code is necessary in places below
+     *
+     * @param param - e.g. "username"
+     * @param credentials - e.g. "username=/"user/", reponse=/" ... 
+     * @return - the value of the requested parameter
+     */
+    private String fetchParam(String param, String credentials) {
         String value = null;
         if (!credentials.isEmpty())
         {
+            //  Look for the param in quoted form first, the most common
             Scanner s = new Scanner(credentials);
-            value = s.findInLine(param+"=" + paramRegex);
+            value = s.findInLine(param+"=" + "\"[^,\"\r\n]*");
             if (value != null)
             {
-                String[] tokList = value.split(splitter, 2);
+                String[] tokList = value.split("=\"", 2);
                 value = tokList[1];
+            }
+            else
+            {
+                //  The param does not exist in quoted form, try unquoted,
+                //  nc is often delivered in this form, and I've seen
+                //  different browsers deliver qop as both quoted and unquoted
+                value = s.findInLine(param+"=" + "[^,\"\r\n]*");
+                if (value != null)
+                {
+                    String[] tokList = value.split("=", 2);
+                    value = tokList[1];
+                }
             }
         }
         return value;
