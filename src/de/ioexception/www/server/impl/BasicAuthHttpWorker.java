@@ -18,8 +18,8 @@ import de.ioexception.www.http.impl.BasicHttpResponse;
  */
 public class BasicAuthHttpWorker extends BasicHttpWorker
 {
-	private static final Map<String, String> authentications;
-	private static final String realm = "Protected Area";
+        private static final Map<String, String> authentications;
+        private static final String realm = "Protected Area";
 
 	static
 	{

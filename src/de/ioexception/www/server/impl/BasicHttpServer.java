@@ -77,9 +77,10 @@ public class BasicHttpServer implements HttpServer
 	@Override
 	public void dispatchRequest(Socket socket)
 	{
-		workerPool.submit(new BasicAuthHttpWorker(socket, this));
+            	workerPool.submit(new DigestAuthHttpWorker(socket, this));
+//		workerPool.submit(new BasicAuthHttpWorker(socket, this));
 //		workerPool.submit(new BasicHttpWorker(socket, this));
-//		workerPool.submit(new CachingHttpWorker(socket, this,cache));
+		//workerPool.submit(new CachingHttpWorker(socket, this,cache));
 	}
 
 	@Override

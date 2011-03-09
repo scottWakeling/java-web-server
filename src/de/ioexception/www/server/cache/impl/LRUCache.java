@@ -41,11 +41,13 @@ public class LRUCache<K, V> implements Cache<K,V>
 		});
 	}
 
+        @Override
 	public V put(K key, V value)
 	{
 		return internalMap.put(key, value);
 	}
 
+        @Override
 	public V get(K key)
 	{
 		return internalMap.get(key);
