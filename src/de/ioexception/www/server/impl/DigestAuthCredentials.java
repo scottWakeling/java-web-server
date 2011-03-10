@@ -24,7 +24,13 @@ public class DigestAuthCredentials {
     private String nc;
     private String cnonce;
     private String response;
-    
+
+    /**
+     * Extracts named parameters from a credentials string as returned by a
+     * client browser in response to a WWW-Authenticate 401
+     *
+     * @param credentials
+     */
     public DigestAuthCredentials(String credentials) {
         
         username = fetchParam("username", credentials);
@@ -69,18 +75,45 @@ public class DigestAuthCredentials {
         return cnonce;
     }
 
+    /**
+     * Returns the MD5 hash of username:realm:password
+     *
+     * @param password
+     * @return
+     */
     String getHA1(String password) {
         return digest(getUsername() + ":" + getRealm() + ":" + password);
     }
 
+    /**
+     * Returns the MD5 hash of method:uri
+     *
+     * @param method
+     * @return
+     */
     String getHA2(HttpMethod method) {
         return digest(method.toString()+":"+getURI());
     }
 
+    /**
+     * Calculate the expected MD5 response for a given password and HTTP method;
+     * used to compare against the result of getResponse(), to see if the same
+     * password was used for the original digest
+     *
+     * @param password
+     * @param method
+     * @return
+     */
     public String calcExpectedResponse(String password, HttpMethod method) {
         return digest(getHA1(password) + ":" + getNonce() + ":" + getNC() + ":" + getCNonce() + ":" + getQOP() + ":" + getHA2(method));
     }
 
+    /**
+     * Returns an MD5 digest of the input string
+     *
+     * @param input
+     * @return
+     */
     private String digest(String input) {
         String digest = null;
         byte b[] = null;
