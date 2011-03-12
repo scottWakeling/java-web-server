@@ -5,8 +5,8 @@
 
 package de.ioexception.www.server.impl;
 
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import java.util.Calendar;
+import java.util.Date;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -45,9 +45,30 @@ public class DigestAuthHttpWorkerTest {
     @Test
     public void testGenerateNonce() {
         System.out.println("generateNonce");
-        String nonce = DigestAuthHttpWorker.generateNonce();
-        assertTrue(DigestAuthHttpWorker.nonceValid(nonce));
-        assertFalse(DigestAuthHttpWorker.nonceValid("not-a-nonce"));
+        String nonce = DigestAuthHttpWorker.generateNonce("/index.html", new Date());
+        assertEquals(DigestAuthHttpWorker.NonceStatus.VALID, DigestAuthHttpWorker.getNonceStatus(nonce, "/index.html"));
+        assertEquals(DigestAuthHttpWorker.NonceStatus.INVALID, DigestAuthHttpWorker.getNonceStatus(nonce, "/the/world/turtle.html")); // good nonce, bad URI
+        assertEquals(DigestAuthHttpWorker.NonceStatus.INVALID, DigestAuthHttpWorker.getNonceStatus("not-a-nonce", "/index.html")); // bad nonce, good URI
     }
 
+    /**
+     * Test of getNonceStatus method, of class DigestAuthHttpWorker.
+     */
+    @Test
+    public void testGetNonceStatusStale() {
+        System.out.println("getNonceStatusStale");
+        Calendar expired = Calendar.getInstance();
+        Date now = new Date();
+
+        //  Test for stale
+        expired.setTime(now);
+        expired.setTimeInMillis(expired.getTimeInMillis() - DigestAuthHttpWorker.NONCE_LIFESPAN);
+        String nonce = DigestAuthHttpWorker.generateNonce("/light-fantastic.html", expired.getTime());
+        assertEquals(DigestAuthHttpWorker.NonceStatus.STALE, DigestAuthHttpWorker.getNonceStatus(nonce, "/light-fantastic.html"));
+
+        //  Test for valid - 59 seconds ago should be valid
+        expired.setTimeInMillis(now.getTime() - (DigestAuthHttpWorker.NONCE_LIFESPAN - 1000));
+        nonce = DigestAuthHttpWorker.generateNonce("/light-fantastic.html", expired.getTime());
+        assertEquals(DigestAuthHttpWorker.NonceStatus.VALID, DigestAuthHttpWorker.getNonceStatus(nonce, "/light-fantastic.html"));
+    }
 }
