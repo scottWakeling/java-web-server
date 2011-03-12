@@ -24,6 +24,7 @@ public class DigestAuthCredentials {
     private String nc;
     private String cnonce;
     private String response;
+    private String opaque;
 
     /**
      * Extracts named parameters from a credentials string as returned by a
@@ -41,6 +42,7 @@ public class DigestAuthCredentials {
         nc = fetchParam("nc", credentials);
         cnonce = fetchParam("cnonce", credentials);
         response = fetchParam("response", credentials);
+        opaque = fetchParam("opaque", credentials);
     }
 
     public String getResponse() {
@@ -73,6 +75,10 @@ public class DigestAuthCredentials {
 
     public String getCNonce() {
         return cnonce;
+    }
+
+    public String getOpaque() {
+        return opaque;
     }
 
     /**

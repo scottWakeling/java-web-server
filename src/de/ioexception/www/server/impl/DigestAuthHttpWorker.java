@@ -55,6 +55,7 @@ public class DigestAuthHttpWorker extends BasicHttpWorker {
             String type = authValues[0];
             String values = authValues[1];
             if (type.equalsIgnoreCase("Digest")) {
+                //  TODO: Check the opaque field is correct for the realm being accessed
                 DigestAuthCredentials credentials = new DigestAuthCredentials(values);
                 if (credentials.getUsername() != null && authentications.containsKey(credentials.getUsername())) {
                     //  Using the provided user's password, calculate the expected MD5 response digest
@@ -85,9 +86,14 @@ public class DigestAuthHttpWorker extends BasicHttpWorker {
 
         //  TODO: Authentication-Info header line?
         //  TODO: qop, nc work
+
+        //  The opaque field must be returned by the client whenever they access a URI in the same protection space, i.e. realm
+        //  The opaque field is a Base64 encoding of the realm being accessed
+        //  TODO: Use the realm being accessed, not the hardcoded "Protected Area" realm
+        String opaque = ", opaque=\"" + Base64.encodeToString(realm.getBytes(), false) + "\"";
         BasicHttpResponse response = new BasicHttpResponse();
         response.setStatusCode(HttpStatusCode.UNAUTHORIZED);
-        response.getHeaders().put("WWW-Authenticate", "Digest realm=\"" + realm + "\", qop=\"auth\", nonce=\"" + generateNonce(request.getRequestUri(), new Date()) + "\"" + ", stale=" + stale);
+        response.getHeaders().put("WWW-Authenticate", "Digest realm=\"" + realm + "\", qop=\"auth\", nonce=\"" + generateNonce(request.getRequestUri(), new Date()) + "\"" + opaque + ", stale=" + stale);
         return response;
     }
 

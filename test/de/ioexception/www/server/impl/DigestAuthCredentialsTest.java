@@ -24,7 +24,8 @@ public class DigestAuthCredentialsTest {
                                                                 + "qop=auth, "
                                                                 + "nc=00000001, "
                                                                 + "cnonce=\"0a4f113b\", "
-                                                                + "response=\"8a6291c576b982d5bdec1a9cca884688\"");
+                                                                + "response=\"8a6291c576b982d5bdec1a9cca884688\""
+                                                                + "opaque=\"some-quoted-string\"");
 
         //  Test out of order access of extracted credential parameters
         assertEquals("user", creds.getUsername());
@@ -34,6 +35,7 @@ public class DigestAuthCredentialsTest {
         assertEquals("Protected Area", creds.getRealm());
         assertEquals("0a4f113b", creds.getCNonce());
         assertEquals("/rince wind/index.html", creds.getURI());
+        assertEquals("some-quoted-string", creds.getOpaque());
     }
 
     /**
